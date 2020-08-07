@@ -13,3 +13,7 @@
     grid-template-rows: repeat(3, 1fr);
     grid-gap: 2px;
 }
+
+.space {
+    border-style: solid;
+}

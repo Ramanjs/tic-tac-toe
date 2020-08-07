@@ -1,22 +1,59 @@
 const gameBoard = (() => {
     const board = [null, null, null, null, null, null, null, null, null];
-    const isGameOver = () => {
-        
-    };
-    const isDraw = () => {
-        
-    };
-    const updateBoard = (symbol, index) => {
-        if (typeof index === "number" && index >= 0 && index <= 8) {
-            board[index] = symbol;
-        }
-    };
+    const winningIndexes = [[0, 1, 2],
+                            [3, 4, 5],
+                            [6, 7, 8],
+                            [0, 3, 6],
+                            [1, 4, 7],
+                            [2, 5, 8],
+                            [2, 4, 6],
+                            [0, 4, 8]];
+    const getBoard = () => board;
     const isLegalMove = (id) => {
         id = parseInt(id);
         if (board[id]) {
             return false;
         }
         return true;
+    };
+    const isGameOver = () => {
+        for(let i=0; i<winningIndexes.length; i++) {
+            let indexSet = winningIndexes[i];
+            if (indexSet.every( val => board[val] === board[indexSet[0]])) {
+                return board[indexSet[0]];
+            }
+        }
+        return false;
+    };
+    const isDraw = () => {
+        if (board.includes(null)) {
+            return false;
+        }
+        return true;
+    };
+    const getResult = () => {
+        let isOver = isGameOver();
+        if (isOver) {
+            return isGameOver;
+        }
+        if (isDraw()) {
+            return "draw";
+        }
+        return false;
+    };
+    const updateBoard = (player) => {
+        let index = parseInt(player.getChoice());
+        let symbol = player.getSymbol();
+        if (index >= 0 && index <= 8) {
+            board[index] = symbol;
+        }
+        displayController.render();
+    };
+    return {
+        getBoard,
+        getResult,
+        updateBoard,
+        isLegalMove,
     };
 })();
 
@@ -31,7 +68,7 @@ const player = (name, symbol) => {
 
 const displayController = (() => {
     const formModal = document.querySelector("#form-modal");
-    const playDivs = document.querySelectorAll(".space");
+    const playDivs = Array.from(document.querySelectorAll(".space"));
     const openForm = () => {
         formModal.style.display = "block";
     };
@@ -48,9 +85,24 @@ const displayController = (() => {
         });
     };
     const render = () => {
-        
+        let board = gameBoard.getBoard();
+        playDivs.forEach(div => {
+            let index = div.id;
+            if (board[index]) {
+                div.innerText = board[index];
+            }
+        })
     };
-    return {openForm, closeForm, displayPlayers, initBoard};
+    const gameOver = result => {
+        let message = "";
+        if (result === "draw") {
+            message = "draw";
+        } else {
+            message = result === 'X' ? `${game.getPlayer(1).getName()} won` : `${game.getPlayer(2).getName()} won`;
+        }
+        window.alert(message);
+    };
+    return {openForm, closeForm, displayPlayers, initBoard, render, gameOver};
 })();
 
 const game = (() => {
@@ -61,18 +113,20 @@ const game = (() => {
     // const addEventListener = (element, evnt, funct) => {
     //     element.addEventListener(evnt, funct);
     // };
+    const getPlayer = id => id === 1 ? player1 : player2; 
     const restart = () => {
 
     };
-    const playRound = () => {
+    const playRound = function () {
         if (gameBoard.isLegalMove(this.id)) {
             let player = turn ? player1 : player2;
             turn = 1 - turn;
             player.setChoice(this.id);
             gameBoard.updateBoard(player);
 
-            if (gameBoard.isGameOver()) {
-                displayController.gameOver();
+            let result = gameBoard.getResult();
+            if (result) {
+                displayController.gameOver(result);
             }
         }
     };
@@ -83,7 +137,7 @@ const game = (() => {
         form.reset();
         displayController.closeForm();
     };
-    const initForm = () => {
+    const init = () => {
         displayController.openForm();
         form.addEventListener('submit', initGame);
         // addEventListener(form, "submit", initGame);
@@ -94,7 +148,7 @@ const game = (() => {
         player1 = player(player1Name, 'X');
         player2 = player(player2Name, 'O');
     };
-    return {initForm, playRound};
+    return {getPlayer, init, playRound};
 })();
 
-game.initForm();
+game.init();
