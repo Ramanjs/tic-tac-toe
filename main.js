@@ -9,6 +9,11 @@ const gameBoard = (() => {
                             [2, 4, 6],
                             [0, 4, 8]];
     const getBoard = () => board;
+    const initBoard = () => {
+        for (let i=0; i<9; i++) {
+            board[i] = null;
+        }
+    };
     const isLegalMove = (id) => {
         id = parseInt(id);
         if (board[id]) {
@@ -34,7 +39,7 @@ const gameBoard = (() => {
     const getResult = () => {
         let isOver = isGameOver();
         if (isOver) {
-            return isGameOver;
+            return isOver;
         }
         if (isDraw()) {
             return "draw";
@@ -51,6 +56,7 @@ const gameBoard = (() => {
     };
     return {
         getBoard,
+        initBoard,
         getResult,
         updateBoard,
         isLegalMove,
@@ -78,6 +84,16 @@ const displayController = (() => {
     const displayPlayers = () => {
         
     };
+    const getIcon = (symbol) => {
+        let icon = document.createElement('i');
+        icon.classList.add('fa');
+        
+        let symbolClass = symbol === 'X' ? 'fa-times' : 'fa-circle-o';
+        icon.classList.add(symbolClass);
+        icon.classList.add('fa-4x');
+
+        return icon;
+    };
     const initBoard = () => {
         //add event listeners to the board
         playDivs.forEach(div => {
@@ -89,7 +105,10 @@ const displayController = (() => {
         playDivs.forEach(div => {
             let index = div.id;
             if (board[index]) {
-                div.innerText = board[index];
+                if (div.firstChild) {
+                    div.removeChild(div.firstChild);
+                }
+                div.appendChild(getIcon(board[index]));
             }
         })
     };
@@ -133,6 +152,7 @@ const game = (() => {
     const initGame = () => {
         event.preventDefault();
         setPlayers();
+        // gameBoard.initBoard();
         displayController.initBoard();
         form.reset();
         displayController.closeForm();
