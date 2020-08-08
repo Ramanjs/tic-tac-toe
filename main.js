@@ -73,14 +73,25 @@ const player = (name, symbol) => {
 }
 
 const displayController = (() => {
+    const container = document.querySelector("#container");
+    const boardContainer = document.querySelector("#board-container");
     const formModal = document.querySelector("#form-modal");
     const playDivs = Array.from(document.querySelectorAll(".space"));
-    const openForm = () => {
+    // const gameOverModal = document.querySelector("#game-over-modal");
+    const messageWindow = document.querySelector("#dialog-box");
+    const msgElement = document.querySelector("#message");
+    const openFormModal = () => {
         formModal.style.display = "block";
     };
-    const closeForm = () => {
+    const closeFormModal = () => {
         formModal.style.display = "none";
     };
+    // const openGameOverModal = () => {
+    //     gameOverModal.style.display = "block";
+    // };
+    // const closeGameOverModal = () => {
+    //     gameOverModal.style.display = "none";
+    // };
     const displayPlayers = () => {
         
     };
@@ -112,29 +123,29 @@ const displayController = (() => {
             }
         })
     };
-    const gameOver = result => {
-        let message = "";
-        if (result === "draw") {
-            message = "draw";
-        } else {
-            message = result === 'X' ? `${game.getPlayer(1).getName()} won` : `${game.getPlayer(2).getName()} won`;
-        }
-        window.alert(message);
+    const gameOver = message => {
+        // openGameOverModal();
+        messageWindow.style.display = "block";
+        msgElement.innerHTML = message;
+        // messageWindow.firstChild.innerText = message;
+        // container.insertBefore(messageWindow, boardContainer);
+        // messageWindow.firstChild.innerText = message;
+
     };
-    return {openForm, closeForm, displayPlayers, initBoard, render, gameOver};
+    return {openFormModal, closeFormModal, displayPlayers, initBoard, render, gameOver};
 })();
 
 const game = (() => {
     let player1 = {};
     let player2 = {};
     let turn = 0;
-    const form = document.querySelector('#form');
+    const form = document.querySelector("#form");
     // const addEventListener = (element, evnt, funct) => {
-    //     element.addEventListener(evnt, funct);
-    // };
+        //     element.addEventListener(evnt, funct);
+        // };
     const getPlayer = id => id === 1 ? player1 : player2; 
     const restart = () => {
-
+        
     };
     const playRound = function () {
         if (gameBoard.isLegalMove(this.id)) {
@@ -142,10 +153,10 @@ const game = (() => {
             turn = 1 - turn;
             player.setChoice(this.id);
             gameBoard.updateBoard(player);
-
+            
             let result = gameBoard.getResult();
             if (result) {
-                displayController.gameOver(result);
+                displayController.gameOver(getMessage(result));
             }
         }
     };
@@ -155,10 +166,10 @@ const game = (() => {
         // gameBoard.initBoard();
         displayController.initBoard();
         form.reset();
-        displayController.closeForm();
+        displayController.closeFormModal();
     };
     const init = () => {
-        displayController.openForm();
+        displayController.openFormModal();
         form.addEventListener('submit', initGame);
         // addEventListener(form, "submit", initGame);
     };
@@ -167,6 +178,15 @@ const game = (() => {
         let player2Name = document.querySelector("#player2").value;
         player1 = player(player1Name, 'X');
         player2 = player(player2Name, 'O');
+    };
+    const getMessage = (result) => {
+        let message = "";
+        if (result === "draw") {
+            message = "It's a draw!";
+        } else {
+            message = result === 'X' ? player1.getName() : player2.getName() + " won the round!";
+        }
+        return message;
     };
     return {getPlayer, init, playRound};
 })();

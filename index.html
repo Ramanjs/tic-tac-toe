@@ -9,15 +9,24 @@
 </head>
 <body>
     <div id="container">
-        <div id="form-modal">
-            <form id="form">
+        <div id="form-modal" class="modal">
+            <form id="form" class="window">
                 <!-- <label for="player1">Player 1 Name</label> -->
                 <input type="text" id="player1" placeholder="Player 1 name" required>
                 <!-- <label for="player2">Player 2 Name</label> -->
                 <input type="text" id="player2" placeholder="Player 2 name" required>
-                <input type="submit">
+                <input type="submit" class="btn">
             </form>
         </div>
+        <!-- <div id="game-over-modal" class="modal"> -->
+            <div id="dialog-box">
+                <p id="message"></p>
+                <div>
+                    <button id="new-round" class="btn msg">New Round</button>
+                    <button id="new-game" class="btn msg">New Game</button>
+                </div>
+            </div>
+        <!-- </div> -->
         <div id="board-container">
             <div id="board">
                 <div id="0" class="space"></div>
