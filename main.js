@@ -73,25 +73,19 @@ const player = (name, symbol) => {
 }
 
 const displayController = (() => {
-    const container = document.querySelector("#container");
-    const boardContainer = document.querySelector("#board-container");
     const formModal = document.querySelector("#form-modal");
     const playDivs = Array.from(document.querySelectorAll(".space"));
-    // const gameOverModal = document.querySelector("#game-over-modal");
     const messageWindow = document.querySelector("#dialog-box");
     const msgElement = document.querySelector("#message");
+    const newRoundBtn = document.querySelector("#new-round");
+    const newGameBtn = document.querySelector("#new-game");
+    const turn = document.querySelector("#turn");
     const openFormModal = () => {
         formModal.style.display = "block";
     };
     const closeFormModal = () => {
         formModal.style.display = "none";
     };
-    // const openGameOverModal = () => {
-    //     gameOverModal.style.display = "block";
-    // };
-    // const closeGameOverModal = () => {
-    //     gameOverModal.style.display = "none";
-    // };
     const displayPlayers = () => {
         
     };
@@ -111,28 +105,39 @@ const displayController = (() => {
             div.addEventListener('click', game.playRound);
         });
     };
+    const deactivateBoard = () => {
+        playDivs.forEach(div => {
+            div.removeEventListener('click', game.playRound);
+        });
+    };
+    const initNewGameBtns = () => {
+        newRoundBtn.addEventListener('click', game.restart);
+        newGameBtn.addEventListener('click', () => window.location.reload());
+    }
     const render = () => {
         let board = gameBoard.getBoard();
         playDivs.forEach(div => {
             let index = div.id;
+            if (div.firstChild) {
+                div.removeChild(div.firstChild);
+            }
             if (board[index]) {
-                if (div.firstChild) {
-                    div.removeChild(div.firstChild);
-                }
                 div.appendChild(getIcon(board[index]));
             }
         })
     };
-    const gameOver = message => {
-        // openGameOverModal();
+    const displayTurn = (name) => {
+        turn.innerText = `${name}'s turn`;
+    };
+    const displayMessage = message => {
         messageWindow.style.display = "block";
         msgElement.innerHTML = message;
-        // messageWindow.firstChild.innerText = message;
-        // container.insertBefore(messageWindow, boardContainer);
-        // messageWindow.firstChild.innerText = message;
-
+        turn.innerText = "";
     };
-    return {openFormModal, closeFormModal, displayPlayers, initBoard, render, gameOver};
+    const closeMessageWindow = () => {
+        messageWindow.style.display = "none";
+    }
+    return {openFormModal, closeFormModal, displayPlayers, initBoard, render, displayMessage, deactivateBoard, initNewGameBtns, closeMessageWindow, displayTurn};
 })();
 
 const game = (() => {
@@ -140,23 +145,28 @@ const game = (() => {
     let player2 = {};
     let turn = 0;
     const form = document.querySelector("#form");
-    // const addEventListener = (element, evnt, funct) => {
-        //     element.addEventListener(evnt, funct);
-        // };
     const getPlayer = id => id === 1 ? player1 : player2; 
     const restart = () => {
-        
+        gameBoard.initBoard();
+        displayController.render();
+        displayController.initBoard();
+        displayController.closeMessageWindow();
+        firstTurn();
     };
     const playRound = function () {
         if (gameBoard.isLegalMove(this.id)) {
             let player = turn ? player1 : player2;
+            let nextPlayer = turn ? player2 : player1;
+            displayController.displayTurn(nextPlayer.getName());
             turn = 1 - turn;
             player.setChoice(this.id);
             gameBoard.updateBoard(player);
             
             let result = gameBoard.getResult();
             if (result) {
-                displayController.gameOver(getMessage(result));
+                displayController.displayMessage(getMessage(result));
+                displayController.deactivateBoard();
+                displayController.initNewGameBtns();
             }
         }
     };
@@ -167,7 +177,13 @@ const game = (() => {
         displayController.initBoard();
         form.reset();
         displayController.closeFormModal();
+        firstTurn();
+        // turn = 1 - turn;
     };
+    const firstTurn = () => {
+        let player = turn ? player1 : player2;
+        displayController.displayTurn(player.getName());
+    }
     const init = () => {
         displayController.openFormModal();
         form.addEventListener('submit', initGame);
@@ -184,11 +200,12 @@ const game = (() => {
         if (result === "draw") {
             message = "It's a draw!";
         } else {
-            message = result === 'X' ? player1.getName() : player2.getName() + " won the round!";
+            message = result === 'X' ? player1.getName() : player2.getName();
+            message += " won the round!";
         }
         return message;
     };
-    return {getPlayer, init, playRound};
+    return {getPlayer, init, playRound, restart};
 })();
 
 game.init();

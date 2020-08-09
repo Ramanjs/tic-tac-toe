@@ -1,5 +1,6 @@
 body {
     margin: 0;
+    font-family: 'Lato', Arial, Helvetica, sans-serif;
 }
 
 #container {
@@ -66,6 +67,7 @@ input[type="text"] {
     padding: 20px;
     background-color: #2B2E33;
     color: #FEFFFF;
+    text-align: center;
 }
 
 .msg {
@@ -98,4 +100,9 @@ input[type="text"] {
 
 .fa-times {
     color: #43A7C1;
+}
+
+#turn {
+    color: #FAFBFF;
+    font-size: 20px;
 }
